@@ -6,7 +6,17 @@ module VagrantPlugins
       class Base
 
         def create_adapter
-          execute("storagectl", @uuid, "--name", "SATA Controller", "--" + (@version.start_with?("4.3") ? "" : "sata") + "portcount", "2")
+          # TODO need to make this cleaner before PR.  Regex for version match, and let's not pass in two empty strings for earlier versions...
+          if @version.starts_with?("4.0") or @version.starts_with?("4.1") or @version.starts_with?("4.2")
+            portcount = "--sataportcount"
+            addaction = ""
+            addtype = ""
+          else
+            portcount = "--portcount"
+            addaction = "--add"
+            addtype = "sata"
+          end
+          execute("storagectl", @uuid, "--name", "SATA Controller", portcount, "2", addaction, addtype )
         end
 
         def create_storage(location, size)
